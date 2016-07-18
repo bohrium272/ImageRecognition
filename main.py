@@ -45,20 +45,25 @@ depth = 16
 hidden = 64
 
 learning_rate = 0.001
+
+def accuracy(predictions, labels):
+  return (100.0 * np.sum(np.argmax(predictions, 1) == np.argmax(labels, 1))
+          / predictions.shape[0])
+print train_labels.shape
 def reformat(dataset, labels):
   dataset = dataset.reshape(
     (-1, image_size, image_size, channels)).astype(np.float32)
-  labels = (np.arange(n_labels) == labels[:,None]).astype(np.float32)
+  labels = (np.arange(n_labels) == labels[:,:]).astype(np.float32)
   return dataset, labels
 train_data, train_labels = reformat(train_data, train_labels)
 test_data, test_labels = reformat(test_data, test_labels)
-
+print train_labels.shape, test_labels.shape
 graph = tf.Graph()
 
 with graph.as_default():
     tf_train_dataset = tf.placeholder(tf.float32, shape=(batch, width, height, channels))
     tf_train_labels = tf.placeholder(tf.float32, shape=(batch, n_labels))
-    # tf_test_dataset = tf.constant(test_data)
+    tf_test_dataset = tf.constant(test_data)
 
     layer1_weights = tf.Variable(tf.truncated_normal([kernel_dimen, kernel_dimen, channels, depth], stddev=0.1))
     layer1_biases = tf.Variable(tf.random_normal([depth], stddev=0.1))
@@ -91,7 +96,7 @@ with graph.as_default():
     optimizer = tf.train.GradientDescentOptimizer(0.05).minimize(loss)
 
     train_prediction = tf.nn.softmax(logits)
-    # test_predicition = tf.nn.softmax(model(tf_test_dataset))
+    test_prediction = tf.nn.softmax(model(tf_test_dataset))
 
     num_steps = 1001
 
@@ -99,41 +104,16 @@ with tf.Session(graph=graph) as session:
   tf.initialize_all_variables().run()
   print('Initialized')
   
-#   p = np.random.permutation(range(len(train_data)))
-
-#   train_X, train_Y = train_data[p], train_labels[p]
-
-#   index1 = 0
-#   index2 = 0
-
   for step in range(num_steps):
-#     index1 = index2
-#     index2 = index1 + batch
-
-#     if index1 >= len(train_data):
-#         index1 = 0
-#         index2 = batch
-#     if index2 >= len(train_data):
-#         index2 = len(train_data) - 1
-#     if index1 == index2:
-#         index1 = 0
-#         index2 = batch
-
-#     input_x, input_y = train_X[index1:index2], train_Y[index1:index2]
-#     _, summary = session.run([optimizer, loss, train_prediction], feed_dict= {tf_train_dataset: input_x, tf_train_labels: input_y, dropout:0.76})
-#     summary_writer.add_summary(summary, step)
-#     if step % 500 == 0:
-#         print message, session.run(accuracy, feed_dict= {tf_train_dataset: input_x, tf_train_labels: input_y, keep_prob:1.0})
-# print message, session.run(accuracy, feed_dict= {tf_train_dataset: test_data, tf_train_labels: test_labels, keep_prob:1.0})
     offset = (step * batch) % (train_labels.shape[0] - batch)
     batch_data = train_data[offset:(offset + batch), :, :, :]
     batch_labels = train_labels[offset:(offset + batch), :]
-    feed_dict = {tf_train_dataset : batch_data, tf_train_labels : batch_labels}
+    feed_dict = {tf_train_dataset : batch_data, tf_train_labels : batch_labels, dropout:0.75}
     _, l, predictions = session.run(
       [optimizer, loss, train_prediction], feed_dict=feed_dict)
     if (step % 50 == 0):
       print('Minibatch loss at step %d: %f' % (step, l))
       print('Minibatch accuracy: %.1f%%' % accuracy(predictions, batch_labels))
-      print('Validation accuracy: %.1f%%' % accuracy(
-        valid_prediction.eval(), valid_labels))
+    #   print('Validation accuracy: %.1f%%' % accuracy(
+    #     valid_prediction.eval(), valid_labels))
   print('Test accuracy: %.1f%%' % accuracy(test_prediction.eval(), test_labels))
