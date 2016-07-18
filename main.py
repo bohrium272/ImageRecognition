@@ -6,10 +6,10 @@ from collections import Counter
 from sklearn.linear_model import SGDClassifier
 #==================EXTRACTING AND ANALYSING DATA FROM .mat FILES===========================
 
-train_data = scipy.io.loadmat('train_32x32.mat', variable_names='X').get('X')
-train_labels = scipy.io.loadmat('train_32x32.mat', variable_names='y').get('y')
-test_data = scipy.io.loadmat('test_32x32.mat', variable_names='X').get('X')
-test_labels = scipy.io.loadmat('test_32x32.mat', variable_names='y').get('y')
+train_data = scipy.io.loadmat('train_32x32.mat')['X']
+train_labels = scipy.io.loadmat('train_32x32.mat')['y']
+test_data = scipy.io.loadmat('test_32x32.mat')['X']
+test_labels = scipy.io.loadmat('test_32x32.mat')['y']
 shape_train = train_data.shape
 shape_test = test_data.shape
 
@@ -28,8 +28,75 @@ shape_test = test_data.shape
 print shape_train[3], "Images with", shape_train[0], "x", shape_train[0], "RGB grid"
 #==================NORMALISATION=============================================
 
-# train_data = train_data.astype('float32') / 128.0 - 1
-# test_data = test_data.astype('float32') / 128.0 - 1
+train_data = train_data.astype('float32') / 128.0 - 1
+test_data = test_data.astype('float32') / 128.0 - 1
+
+def OnehotEndoding(Y):
+    Ytr=[]
+    for el in Y:
+        temp=np.zeros(10)
+        if el==10:
+            temp[0]=1
+        elif el==1:
+            temp[1]=1
+        elif el==2:
+            temp[2]=1
+        elif el==3:
+            temp[3]=1
+        elif el==4:
+            temp[4]=1
+        elif el==5:
+            temp[5]=1
+        elif el==6:
+            temp[6]=1
+        elif el==7:
+            temp[7]=1
+        elif el==8:
+            temp[8]=1
+        elif el==9:
+            temp[9]=1
+        Ytr.append(temp)
+        
+    return np.asarray(Ytr)
+def reformat(data, Y):
+    xtrain = []
+    trainLen = data.shape[3]
+    for x in xrange(trainLen):
+        xtrain.append(data[:,:,:,x])
+    xtrain = np.asarray(xtrain)
+    Ytr=[]
+    for el in Y:
+        temp=np.zeros(10)
+        if el==10:
+            temp[0]=1
+        elif el==1:
+            temp[1]=1
+        elif el==2:
+            temp[2]=1
+        elif el==3:
+            temp[3]=1
+        elif el==4:
+            temp[4]=1
+        elif el==5:
+            temp[5]=1
+        elif el==6:
+            temp[6]=1
+        elif el==7:
+            temp[7]=1
+        elif el==8:
+            temp[8]=1
+        elif el==9:
+            temp[9]=1
+        Ytr.append(temp)
+    return xtrain, np.asarray(Ytr)
+
+train_data, train_labels = reformat(train_data, train_labels)
+test_data, test_labels = reformat(test_data, test_labels)
+
+# train_labels = OnehotEndoding(train_labels)
+# test_labels = OnehotEndoding(test_labels)
+
+print train_data.shape
 
 #============================================================================
 image_size = 32
@@ -38,35 +105,22 @@ height = 32
 channels = 3
 
 n_labels = 10
-kernel_dimen = 5
-batch = 16
+patch = 5
 depth = 16
-hidden = 64
+hidden = 128
+dropout = 0.9375
 
+batch = 16
 learning_rate = 0.001
 
-def accuracy(predictions, labels):
-    return (100.0 * np.sum(np.argmax(predictions, 1) == np.argmax(labels, 1))
-          / predictions.shape[0])
-print train_labels.shape
-def reformat(dataset, labels):
-    dataset = dataset.reshape(
-        (-1, image_size, image_size, channels)).astype(np.float32)
-    labels = (np.arange(n_labels) == labels[:,:]).astype(np.float32)
-    return dataset, labels
-train_data, train_labels = reformat(train_data, train_labels)
-test_data, test_labels = reformat(test_data, test_labels)
-print train_labels.shape, test_labels.shape
-# graph = tf.Graph()
-# with graph.as_default():
-tf_train_dataset = tf.placeholder(tf.float32, shape=(batch, width, height, channels))
-tf_train_labels = tf.placeholder(tf.float32, shape=(batch, n_labels))
+tf_train_dataset = tf.placeholder(tf.float32, shape=(None, width, height, channels))
+tf_train_labels = tf.placeholder(tf.float32, shape=(None, n_labels))
 tf_test_dataset = tf.constant(test_data)
 
-layer1_weights = tf.Variable(tf.truncated_normal([kernel_dimen, kernel_dimen, channels, depth], stddev=0.1))
-layer1_biases = tf.Variable(tf.zeros([depth]))
+layer1_weights = tf.Variable(tf.truncated_normal([patch, patch, channels, depth], stddev=0.1))
+layer1_biases = tf.Variable(tf.constant(1.0, shape=[depth]))
 
-layer2_weights = tf.Variable(tf.truncated_normal([kernel_dimen, kernel_dimen, depth, depth], stddev=0.1))
+layer2_weights = tf.Variable(tf.truncated_normal([patch, patch, depth, depth], stddev=0.1))
 layer2_biases = tf.Variable(tf.constant(1.0, shape=[depth]))
 
 layer3_weights = tf.Variable(tf.truncated_normal([image_size // 4 * image_size // 4 * depth, hidden], stddev=0.1))
@@ -99,13 +153,19 @@ def model(data):
 
 logits = model(tf_train_dataset)
 loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits, tf_train_labels))
-
 optimizer = tf.train.AdamOptimizer(0.001).minimize(loss)
 
 train_prediction = tf.nn.softmax(logits)
 test_prediction = tf.nn.softmax(model(tf_test_dataset))
 
-num_steps = 3000
+
+def accuracy(predictions, labels):
+    return (100.0 * np.sum(np.argmax(predictions, 1) == np.argmax(labels, 1))
+          / predictions.shape[0])
+print train_labels.shape
+
+
+num_steps = 10000
 
 with tf.Session() as session:
     tf.initialize_all_variables().run()
@@ -122,6 +182,5 @@ with tf.Session() as session:
             accu = accuracy(predictions, batch_labels)
             print('Minibatch accuracy: %.1f%%' % accu)
             average += accu
-    print "Average Accuracy : ", (average / num_steps) * 100
-  
-  # print('Test accuracy: %.1f%%' % accuracy(test_prediction.eval(), test_labels))
+    # print "Average Accuracy : ", (average / num_steps * 100) * 100
+    # print('Test accuracy: %.1f%%' % accuracy(test_prediction.eval(), test_labels))
