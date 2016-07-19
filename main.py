@@ -67,8 +67,11 @@ def reformat(data, Y):
 
 train_data, train_labels = reformat(train_data, train_labels)
 test_data, test_labels = reformat(test_data, test_labels)
-print test_data.shape
+
+
 #============================================================================
+
+
 image_size = 32
 width = 32
 height = 32
@@ -164,4 +167,3 @@ with tf.Session() as session:
             print('Minibatch accuracy: %.1f%%' % accu)
         average += accu
     print "Average Accuracy : ", (average / num_steps)
-    # session.run([optimizer, loss, test_prediction], feed_dict={tf_train_dataset : test_data, tf_train_labels : test_labels, dropout: 1.0})
