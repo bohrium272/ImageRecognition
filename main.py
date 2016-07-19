@@ -120,7 +120,7 @@ def model(data):
     reshape = tf.reshape(hidden4, [-1, shape[1] * shape[2] * shape[3]])
     hidden5 = tf.nn.relu(tf.matmul(reshape, layer3_weights) + layer3_biases)
     
-    dropout_layer = tf.nn.dropout(hidden5, 0.75)
+    dropout_layer = tf.nn.dropout(hidden5, 0.93)
     
     return tf.matmul(dropout_layer, layer4_weights) + layer4_biases
 
@@ -146,7 +146,7 @@ with tf.Session() as session:
         offset = (step * batch) % (train_labels.shape[0] - batch)
         batch_data = train_data[offset:(offset + batch), :, :, :]
         batch_labels = train_labels[offset:(offset + batch), :]
-        feed_dict = {tf_train_dataset : batch_data, tf_train_labels : batch_labels, dropout: 0.75}
+        feed_dict = {tf_train_dataset : batch_data, tf_train_labels : batch_labels, dropout: 0.93}
         _, l, predictions = session.run([optimizer, loss, train_prediction], feed_dict=feed_dict)
         accu = accuracy(predictions, batch_labels)
         if (step % 50 == 0):
@@ -154,12 +154,13 @@ with tf.Session() as session:
             print('Minibatch accuracy: %.1f%%' % accu)
         average += accu
     print "Average Accuracy : ", (average / num_steps)
+    print "END OF TRAINING"
     average = 0
     for step in range(num_steps):
         offset = (step * batch) % (test_labels.shape[0] - batch)
         batch_data = test_data[offset:(offset + batch), :, :, :]
         batch_labels = test_labels[offset:(offset + batch), :]
-        feed_dict = {tf_train_dataset : batch_data, tf_train_labels : batch_labels, dropout: 0.75}
+        feed_dict = {tf_train_dataset : batch_data, tf_train_labels : batch_labels, dropout: 0.93}
         _, l, predictions = session.run([optimizer, loss, train_prediction], feed_dict=feed_dict)
         accu = accuracy(predictions, batch_labels)
         if (step % 50 == 0):
@@ -167,3 +168,4 @@ with tf.Session() as session:
             print('Minibatch accuracy: %.1f%%' % accu)
         average += accu
     print "Average Accuracy : ", (average / num_steps)
+    print "END OF TESTING"
