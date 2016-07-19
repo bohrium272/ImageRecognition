@@ -81,6 +81,8 @@ test_data, test_labels = reformat(test_data, test_labels)
 
 
 #============================================================================
+
+#==================BUILDING THE CNN==========================================
 """
 Various Hyperparameters required for training the CNN.
 """
@@ -153,7 +155,9 @@ optimizer = tf.train.AdamOptimizer(0.001).minimize(loss)
 
 train_prediction = tf.nn.softmax(logits)
 test_prediction = tf.nn.softmax(model(tf_test_dataset))
+#============================================================================
 
+#==================TRAINING AND TESTING THE MODEL============================
 """
 Accuracy function defined similar to the one taught in the Udacity Deep Learning Course
 Returns percentage of correct predictions by verifying with Labels
@@ -202,3 +206,4 @@ with tf.Session() as session:
         average += accu
     print "Average Accuracy : ", (average / num_steps)
     print "END OF TESTING"
+#============================================================================
