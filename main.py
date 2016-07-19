@@ -6,10 +6,10 @@ from collections import Counter
 from sklearn.linear_model import SGDClassifier
 #==================EXTRACTING AND ANALYSING DATA FROM .mat FILES===========================
 
-train_data = scipy.io.loadmat('train_32x32.mat')['X']
-train_labels = scipy.io.loadmat('train_32x32.mat')['y']
-test_data = scipy.io.loadmat('test_32x32.mat')['X']
-test_labels = scipy.io.loadmat('test_32x32.mat')['y']
+train_data = scipy.io.loadmat('../train_32x32.mat')['X']
+train_labels = scipy.io.loadmat('../train_32x32.mat')['y']
+test_data = scipy.io.loadmat('../test_32x32.mat')['X']
+test_labels = scipy.io.loadmat('../test_32x32.mat')['y']
 shape_train = train_data.shape
 shape_test = test_data.shape
 
