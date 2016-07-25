@@ -167,7 +167,7 @@ def accuracy(predictions, labels):
           / predictions.shape[0])
 
 #   Number of iterations
-num_steps = 20000
+num_steps = 10000
 
 with tf.Session() as session:
     tf.initialize_all_variables().run()
