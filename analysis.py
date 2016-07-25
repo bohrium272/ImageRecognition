@@ -7,8 +7,7 @@ from scipy import stats
 """
 Output Files
 """
-# file_names = ['output_1.txt', 'output_2_10000.txt', 'output_2_20000.txt', 'output_3.txt', 'output_4.txt', 'output_5.txt']
-file_names = ['output_2_10000.txt']
+file_names = ['output_1.txt', 'output_2_10000.txt', 'output_2_20000.txt', 'output_3.txt', 'output_4.txt', 'output_5.txt']
 for fname in file_names:
     #   Clearing the Plot
     plt.clf()
@@ -59,46 +58,46 @@ for fname in file_names:
     plt.savefig(figname, pad_inches=0.1, bbox_inches='tight')
 
 
-# """
-# Analysing information loss of best configuration
-# """
-# fname = 'output_2_10000.txt'
-# f = file('output_2_10000.txt')
-# lines = f.read().split('\n')
+"""
+Analysing information loss of best configuration
+"""
+fname = 'output_2_10000.txt'
+f = file('output_2_10000.txt')
+lines = f.read().split('\n')
 
-# i = 0
+i = 0
 
-# #   Extracting Information Loss
-# info_loss_training = []
-# while 'Average Accuracy' not in lines[i] and i < len(lines):
-#     if 'Minibatch loss' in lines[i]:
-#         info_loss_training.append(float(lines[i][lines[i].index(':') + 1:].strip()))
-#     i += 1
-# info_loss_train = []
-# #   Scaling down to fit the graph
-# for j in xrange(len(info_loss_training)):
-#     if (j * 50) % 100 == 0:
-#         info_loss_train.append(info_loss_training[j]) 
-# #   Plotting the Training Data
-# plt.plot(range(100), info_loss_train, color='blue', label='Training')
-# i += 1
+#   Extracting Information Loss
+info_loss_training = []
+while 'Average Accuracy' not in lines[i] and i < len(lines):
+    if 'Minibatch loss' in lines[i]:
+        info_loss_training.append(float(lines[i][lines[i].index(':') + 1:].strip()))
+    i += 1
+info_loss_train = []
+#   Scaling down to fit the graph
+for j in xrange(len(info_loss_training)):
+    if (j * 50) % 100 == 0:
+        info_loss_train.append(info_loss_training[j]) 
+#   Plotting the Training Data
+plt.plot(range(100), info_loss_train, color='blue', label='Training')
+i += 1
 
-# #   Repeating for Testing Data
-# info_loss_testing = []
-# while 'Average Accuracy' not in lines[i] and i < len(lines):
-#     if 'Minibatch loss' in lines[i]:
-#         info_loss_testing.append(float(lines[i][lines[i].index(':') + 1:].strip()))
-#     i += 1
-# info_loss_test = []
-# for j in xrange(len(info_loss_testing)):
-#     if (j * 50) % 100 == 0:
-#         info_loss_test.append(info_loss_testing[j]) 
-# #   Plotting Testing Data
-# plt.plot(range(100), info_loss_test, color='red', label='Testing')
-# #   Saving the Graph
-# plt.title(fname + '\nInformation Loss')
-# plt.ylabel('Information loss')
-# plt.xlabel('Number of iterations(x100)')
-# plt.legend()
-# figname = 'info_10000.png'
-# plt.savefig(figname, pad_inches=0.1, bbox_inches='tight')
+#   Repeating for Testing Data
+info_loss_testing = []
+while 'Average Accuracy' not in lines[i] and i < len(lines):
+    if 'Minibatch loss' in lines[i]:
+        info_loss_testing.append(float(lines[i][lines[i].index(':') + 1:].strip()))
+    i += 1
+info_loss_test = []
+for j in xrange(len(info_loss_testing)):
+    if (j * 50) % 100 == 0:
+        info_loss_test.append(info_loss_testing[j]) 
+#   Plotting Testing Data
+plt.plot(range(100), info_loss_test, color='red', label='Testing')
+#   Saving the Graph
+plt.title(fname + '\nInformation Loss')
+plt.ylabel('Information loss')
+plt.xlabel('Number of iterations(x100)')
+plt.legend()
+figname = 'info_10000.png'
+plt.savefig(figname, pad_inches=0.1, bbox_inches='tight')
